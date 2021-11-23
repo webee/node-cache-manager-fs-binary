@@ -102,22 +102,33 @@ DiskStore.prototype.isCacheableValue = function (value) {
 /**
  * delete an entry from the cache
  */
-DiskStore.prototype.del = function (key, options, cb) {
+DiskStore.prototype.del = function (keys, options, cb) {
+  if (!Array.isArray(keys)) {
+    keys = [keys]
+  }
+
   if (typeof options === 'function') {
     cb = options
     options = null
   }
   cb = typeof cb === 'function' ? cb : noop
 
+  keys.forEach((key) => {
+    this.deleting(key)
+  })
+  cb(null)
+}
+
+DiskStore.prototype.deleting = function deleting(key) {
   // get the metainformations for the key
   var metaData = this.collection[key]
   if (!metaData) {
-    return cb(null)
+    return
   }
 
   // check if the filename is set
   if (!metaData.filename) {
-    return cb(null)
+    return
   }
   // check for existance of the file
   fsp
@@ -155,16 +166,15 @@ DiskStore.prototype.del = function (key, options, cb) {
                 },
                 function (err) {},
               )
-              return fsp.unlink(metaExtra.filename)
+              return fsp.unlink(metaData.filename, noop)
             } else {
-              return fsp.unlink(metaExtra.filename)
+              return fsp.unlink(metaData.filename, noop)
             }
           }.bind(this),
         )
       }.bind(this),
       function () {
         // not found
-        cb(null)
       },
     )
     .then(
@@ -173,12 +183,9 @@ DiskStore.prototype.del = function (key, options, cb) {
         this.currentsize -= metaData.size
         this.collection[key] = null
         delete this.collection[key]
-        cb(null)
       }.bind(this),
     )
-    .catch(function (err) {
-      cb(null)
-    })
+    .catch(function (err) {})
 }
 
 /**

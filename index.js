@@ -131,14 +131,14 @@ DiskStore.prototype.del = function (key, options, cb) {
         this.unzipIfNeeded(
           metaExtraContent,
           function (err, data) {
-            if (!err) {
-              return
+            if (err) {
+              throw err
             }
 
             try {
               var metaExtra = JSON.parse(data)
-            } catch (e) {
-              return
+            } catch (err) {
+              throw err
             }
 
             if (
@@ -155,9 +155,9 @@ DiskStore.prototype.del = function (key, options, cb) {
                 },
                 function (err) {},
               )
-              return fsp.unlink(metaData.filename)
+              return fsp.unlink(metaExtra.filename)
             } else {
-              return fsp.unlink(metaData.filename)
+              return fsp.unlink(metaExtra.filename)
             }
           }.bind(this),
         )

@@ -1,6 +1,6 @@
 {
   "name": "@webee/cache-manager-fs-binary",
-  "version": "1.0.4-p1",
+  "version": "1.0.4-p2",
   "description": "file system store for node cache manager with binary data as files",
   "files": [
     "*.js"
